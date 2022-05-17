@@ -18,7 +18,7 @@ int main(){
 	int i,j,dim;
 	double tolerancia;
 
-	printf("Insira a dimensão da matriz desejada: \n");
+	printf("Insira a dimensao da matriz desejada: \n");
 	scanf("%d", &dim);
 
 	double **matriz, *x, *b;
