@@ -18,13 +18,3 @@ void testArguments(int argumentCounter){
    } 
 }
 
-int **matrixGen(int N){
-   int *matrix;
-   int i;
-   matrix=(int *)calloc(N ,sizeof(int));
-   for(int i=0;i<N ;i++){
-          matrix[i]= (int) (int *)calloc(N ,sizeof(int));
-   }
-
-   return matrix;
-}
