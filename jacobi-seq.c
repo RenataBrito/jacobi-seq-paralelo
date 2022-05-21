@@ -14,7 +14,8 @@ int main(int argc, char *argv[])
    int orderOfMatrix = atoi(argv[1]);
    int numberOfThreads = atoi(argv[2]);
    int i, j;
-   long long int lineSum[orderOfMatrix];
+  // long long int lineSum[orderOfMatrix];
+   int* lineSum = malloc(orderOfMatrix*sizeof(long int));
    int bVector[orderOfMatrix];
    printf("Matrix Order: %d, Number of Threads:  %d \n", orderOfMatrix, numberOfThreads);
    //long long int matrix[orderOfMatrix][orderOfMatrix];
@@ -110,7 +111,8 @@ int main(int argc, char *argv[])
    {
       // Critério da coluna
       int colunmCriteria = 1;
-      long int colunmSum[orderOfMatrix];
+      //long int colunmSum[orderOfMatrix];
+      int* colunmSum = malloc(orderOfMatrix*sizeof(long int));
 
       for (i = 0; i < orderOfMatrix; i++)
       {
@@ -141,8 +143,10 @@ int main(int argc, char *argv[])
          printf("Converge pelo metodo das colunas");
    }
    // Calculos dos x_i^k+1 *****************************
-   float lastResults[orderOfMatrix];
-   float currentResults[orderOfMatrix], accumulator, maximoDiff, maximoValor, diferenca;
+   //float lastResults[orderOfMatrix];
+   float* lastResults = malloc(orderOfMatrix*sizeof(float));
+   float accumulator, maximoDiff, maximoValor, diferenca;
+   float* currentResults = malloc(orderOfMatrix*sizeof(float));
    int k = 0;
    //printf("\nVetor inicial: ");
    for (i = 0; i < orderOfMatrix; i++)
