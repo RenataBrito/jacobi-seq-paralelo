@@ -14,11 +14,9 @@ int main(int argc, char *argv[])
    int orderOfMatrix = atoi(argv[1]);
    int numberOfThreads = atoi(argv[2]);
    int i, j;
-  // long long int lineSum[orderOfMatrix];
    int* lineSum = malloc(orderOfMatrix*sizeof(long int));
    int bVector[orderOfMatrix];
    printf("Matrix Order: %d, Number of Threads:  %d \n", orderOfMatrix, numberOfThreads);
-   //long long int matrix[orderOfMatrix][orderOfMatrix];
    int** matrix = malloc(orderOfMatrix*sizeof(*matrix));
    for(i=0;i<orderOfMatrix;i++){
       matrix[i]=malloc(orderOfMatrix*sizeof(*matrix[i]));
@@ -38,16 +36,12 @@ int main(int argc, char *argv[])
 
    for (i = 0; i < orderOfMatrix; i++)
    {
-      //printf(" entra 1 for geracao da matriz\n ");
       lineSum[i] = 0;
    }
    // Geração de matriz ordem (orderOfMatrix) que sempre passa no critério das linhas.
-  //printf(" entra for geracao da matriz\n ");
    for (i = 0; i < orderOfMatrix; i++)
    {
       for (j = 0; j < orderOfMatrix; j++)
-
-     // printf(" entra for geracao da matriz 3 \n ");
       {
          if (i != j)
          {
@@ -59,29 +53,11 @@ int main(int argc, char *argv[])
       }
    }
 
-   //print da matriz e vetor B
-   /*
+   /*********************** Criterios de Convergencia ***************************** */
+   /************************** Criterio das Linhas ******************************** */
+   int lineCriteria = 1; 
    for (i = 0; i < orderOfMatrix; i++)
    {
-      for (j = 0; j < orderOfMatrix; j++)
-      {
-         printf("%d ", matrix[i][j]);
-      }
-      printf("\n");
-   }
-   printf("\nVetor B: ");
-   for (i = 0; i < orderOfMatrix; i++)
-   {
-      printf("%d ", bVector[i]);
-   }
-   */
-
-   // Critérios de convergência *********************
-   int lineCriteria = 1;
-
-   for (i = 0; i < orderOfMatrix; i++)
-   {
-      //printf(" entra criterio linha\n "); 
       lineSum[i] = 0;
    }
    for (i = 0; i < orderOfMatrix; i++)
@@ -109,9 +85,8 @@ int main(int argc, char *argv[])
    }
    else
    {
-      // Critério da coluna
+      /*********************** Critério das Colunas ***************************** */
       int colunmCriteria = 1;
-      //long int colunmSum[orderOfMatrix];
       int* colunmSum = malloc(orderOfMatrix*sizeof(long int));
 
       for (i = 0; i < orderOfMatrix; i++)
@@ -121,7 +96,6 @@ int main(int argc, char *argv[])
 
       for (i = 0; i < orderOfMatrix; i++)
       {
-         //printf(" entra criterio linha\n "); 
          if (colunmCriteria)
          {
             for (j = 0; j < orderOfMatrix; j++)
@@ -142,68 +116,54 @@ int main(int argc, char *argv[])
       if (colunmCriteria)
          printf("Converge pelo metodo das colunas");
    }
-   // Calculos dos x_i^k+1 *****************************
-   //float lastResults[orderOfMatrix];
+   /*********************** -------------------- ***************************** */
+   /*********************** Calculos dos x_i^k+1 ***************************** */
+   /*********************** -------------------- ***************************** */
    float* lastResults = malloc(orderOfMatrix*sizeof(float));
-   float accumulator, maximoDiff, maximoValor, diferenca;
+   float  maximoDiff, maximoValor, diferenca;
    float* currentResults = malloc(orderOfMatrix*sizeof(float));
    int k = 0;
-   //printf("\nVetor inicial: ");
+   /******************** Definicao do vetor inicial ************************** */
    for (i = 0; i < orderOfMatrix; i++)
-   { // lastVector = b(i)/a(ii) (valores iniciais.)
+   {
       lastResults[i] = (float)bVector[i] / (float)matrix[i][i];
-      currentResults[i] = 0;
-      //printf("%.3f ", lastResults[i]);
+      currentResults[i] = 0; //redundant?
    }
-
+   /******************** Iteracoes do metodo de Jacobi *********************** */
    printf("\n\nComecando as iteracoes\n");
-   /*for (k = 0; k < 15; k++)*/
    do
    {
       maximoValor = 0;
       maximoDiff = 0;
       for (i = 0; i < orderOfMatrix; i++)
       {
-         accumulator = 0;
+         currentResults[i] = 0;
 
          for (j = 0; j < orderOfMatrix; j++)
          {
             if (i == j)
-               accumulator = accumulator + (float)bVector[i];
+               currentResults[i] = currentResults[i] + ((float)bVector[i]/(float)matrix[i][i]);
             else
-               accumulator = accumulator - (matrix[i][j] * lastResults[j]);
+               currentResults[i] = currentResults[i] - ((float) matrix[i][j] * lastResults[j] / (float) matrix[i][i]);
          }
-         accumulator = accumulator / matrix[i][i];
-         currentResults[i] = accumulator;
-
+         //Define o max(vetorAtual) para usar no criterio de parada
          if (fabs(currentResults[i]) > maximoValor)
          {
             maximoValor = fabs(currentResults[i]);
          }
-
-         diferenca = fabs(currentResults[i] - lastResults[i]);
-         if (diferenca > maximoDiff)
+         //Define a maior diferença para ser usada no criterio de parada
+         if (fabs(currentResults[i] - lastResults[i]) > maximoDiff)
          {
-            maximoDiff = diferenca;
+            maximoDiff = fabs(currentResults[i] - lastResults[i]);
          }
       }
-      /*
-      if (maximoDiff / maximoValor <= 0.0015) // 0.0015 está sendo utilizado por conta do arredondamento das casas decimais
-      {
-         break;
-      }*/
-
+      // passa os valores pro vetor "velho" pra ser usado na proxima iteração
       for (i = 0; i < orderOfMatrix; i++)
       {
          lastResults[i] = currentResults[i];
       }
       k++;
    } while (maximoDiff / maximoValor >= 0.0015);
-
-   for (i = 0; i < orderOfMatrix; i++)
-   {
-      lastResults[i] = currentResults[i];
-   }
 
    printf("Total de iteracoes: %d\n", k);
 
