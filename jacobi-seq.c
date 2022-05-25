@@ -2,12 +2,14 @@
 #include <stdlib.h>
 #include <math.h>
 #include "utils.h"
+#include <omp.h>
 
 #define RAND_UPPER_BOUND 10
 #define RAND_LOWER_BOUND 0
 
 int main(int argc, char *argv[])
 {
+   double wtime;
 
    srand(64591);
    testArguments(argc);
@@ -16,7 +18,7 @@ int main(int argc, char *argv[])
    int i, j;
    int* lineSum = malloc(orderOfMatrix*sizeof(long int));
    int bVector[orderOfMatrix];
-   printf("Matrix Order: %d, Number of Threads:  %d \n", orderOfMatrix, numberOfThreads);
+   printf("\nMatrix Order: %d, Number of Threads:  %d \n", orderOfMatrix, numberOfThreads);
    int** matrix = malloc(orderOfMatrix*sizeof(*matrix));
    for(i=0;i<orderOfMatrix;i++){
       matrix[i]=malloc(orderOfMatrix*sizeof(*matrix[i]));
@@ -55,6 +57,8 @@ int main(int argc, char *argv[])
 
    /*********************** Criterios de Convergencia ***************************** */
    /************************** Criterio das Linhas ******************************** */
+   wtime = omp_get_wtime();
+
    int lineCriteria = 1; 
    for (i = 0; i < orderOfMatrix; i++)
    {
@@ -73,7 +77,7 @@ int main(int argc, char *argv[])
             if (lineSum[i] > matrix[i][i])
             {
                lineCriteria = 0;
-               printf("\nNao converge pelo criterio das linhas\n");
+               printf("\nNao converge pelo criterio das linhas!\n");
                break;
             }
          }
@@ -81,7 +85,7 @@ int main(int argc, char *argv[])
    }
    if (lineCriteria)
    {
-      printf("\n\nA matriz converge pelo criterio das linhas\n");
+      printf("\nA matriz converge pelo criterio das linhas!\n");
    }
    else
    {
@@ -107,14 +111,14 @@ int main(int argc, char *argv[])
                if (colunmSum[i] > matrix[i][i])
                {
                   colunmCriteria = 0;
-                  printf("\nNao converge pelo criterio das colunas e nem das linhas\n");
+                  printf("\nNao converge pelo criterio das colunas e nem das linhas!\n");
                   break;
                }
             }
          }
       }
       if (colunmCriteria)
-         printf("Converge pelo metodo das colunas");
+         printf("Converge pelo metodo das colunas!");
    }
    /*********************** -------------------- ***************************** */
    /*********************** Calculos dos x_i^k+1 ***************************** */
@@ -130,7 +134,7 @@ int main(int argc, char *argv[])
       currentResults[i] = 0; //redundant?
    }
    /******************** Iteracoes do metodo de Jacobi *********************** */
-   printf("\n\nComecando as iteracoes\n");
+   printf("\nComecando as iteracoes\n");
    do
    {
       maximoValor = 0;
@@ -166,6 +170,10 @@ int main(int argc, char *argv[])
    } while (maximoDiff / maximoValor >= 0.0015);
 
    printf("Total de iteracoes: %d\n", k);
+   wtime = omp_get_wtime() - wtime;
+
+    
+    printf ("Tempo sequencial: %.5f\n", wtime );
 
    /*printf("\nResposta: ");
    for (i = 0; i < orderOfMatrix; i++)
