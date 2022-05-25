@@ -148,11 +148,13 @@ int main(int argc, char *argv[])
    }
    /******************** Iteracoes do metodo de Jacobi *********************** */
    printf("\n\nComecando as iteracoes\n");
+   omp_set_nested(1);
    do
    {
       maximoValor = 0;
       maximoDiff = 0;
-      #pragma omp parallel for shared(maximoDiff,maximoValor,k) private(i,j) num_threads(numberOfThreads)
+      #pragma omp parallel for shared(k) private(i,j) schedule(static) \
+       num_threads(numberOfThreads) reduction(max: maximoValor) reduction(max: maximoDiff)
       for (i = 0; i < orderOfMatrix; i++)
       {
          currentResults[i] = 0;
@@ -160,43 +162,49 @@ int main(int argc, char *argv[])
          for (j = 0; j < orderOfMatrix; j++)
          {
             if (i == j)
-               currentResults[i] = currentResults[i] + ((float)bVector[i]/(float)matrix[i][i]);
+               currentResults[i] += ((float)bVector[i]/(float)matrix[i][i]);
             else
-               currentResults[i] = currentResults[i] - ((float) matrix[i][j] * lastResults[j] / (float) matrix[i][i]);
+               currentResults[i] -=  ((float) matrix[i][j] * lastResults[j] / (float) matrix[i][i]);
          }
          //Define o max(vetorAtual) para usar no criterio de parada
          if (fabs(currentResults[i]) > maximoValor)
          {
-            #pragma omp critical (maximoValorWrite)
             maximoValor = fabs(currentResults[i]);
          }
          //Define a maior diferença para ser usada no criterio de parada
          if (fabs(currentResults[i] - lastResults[i]) > maximoDiff)
          {
-            #pragma omp critical (maximoDiffWrite)
             maximoDiff = fabs(currentResults[i] - lastResults[i]);
          }
-      }
+/*          thread_num = omp_get_thread_num();    
+         nthreads = omp_get_num_threads( );
+         #pragma omp critical //é mesmo necessário?
+         {
+         printf(" \nHello-world da thread %d na região paralela, Num_threads aqui: %d, i: %d, j: %d\n", thread_num, nthreads,i,j);
+         }
+ */      }
       // passa os valores pro vetor "velho" pra ser usado na proxima iteração
       #pragma omp parallel for private(i) num_threads(orderOfMatrix)
       for (i = 0; i < orderOfMatrix; i++)
       {
          lastResults[i] = currentResults[i];
       }
-      #pragma omp critical
+      #pragma omp critical //Impacto disso no desempenho???
       {
       k++;
       }
+      //printf(" \n ---------- Separador --------- \n");
    } while (maximoDiff / maximoValor >= 0.0015);
 
    wtime = omp_get_wtime() - wtime;
    printf("Tempo Paralelo: %.5f\n", wtime );
    printf("Total de iteracoes: %d\n", k);
 
-   printf("\nResposta: \n");
+   /* printf("\nResposta: \n");
    for (i = 0; i < orderOfMatrix; i++)
    {
-      //printf("%.3f ", currentResults[i]);
+      printf("%.3f ", currentResults[i]);
    }
+   printf("\n"); */
    return 0;
 }
