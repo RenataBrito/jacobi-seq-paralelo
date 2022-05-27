@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <omp.h>
+#include <sys/time.h>
 #include "utils.h"
 
 #define RAND_UPPER_BOUND 10
@@ -9,14 +10,18 @@
 
 int main(int argc, char *argv[])
 {
+   //TEMPO
+   struct timeval start, end;
 
    srand(64591);
    testArguments(argc);
-   double wtime;
+   double tempoConvergencia;
+   double tempoIteracoes;
    int orderOfMatrix = atoi(argv[1]);
    int numberOfThreads = atoi(argv[2]);
    int i, j;
    int* lineSum = malloc(orderOfMatrix*sizeof(long int));
+   int* colunmSum = malloc(orderOfMatrix*sizeof(long int));
    int bVector[orderOfMatrix];
    printf("Matrix Order: %d, Number of Threads:  %d \n", orderOfMatrix, numberOfThreads);
    int** matrix = malloc(orderOfMatrix*sizeof(*matrix));
@@ -54,7 +59,8 @@ int main(int argc, char *argv[])
       }
    }
 
-   wtime = omp_get_wtime();
+   tempoConvergencia = omp_get_wtime();
+   gettimeofday(&start,NULL);
    /*********************** Criterios de Convergencia ***************************** */
    /************************** Criterio das Linhas ******************************** */
    int lineCriteria = 1;
@@ -94,14 +100,12 @@ int main(int argc, char *argv[])
    }
    if (lineCriteria)
    {
-      printf("\n\nA matriz converge pelo criterio das linhas\n");
+      printf("\nA matriz converge pelo criterio das linhas\n");
    }
    else
    {
       /*********************** Critério das Colunas ***************************** */
       int colunmCriteria = 1;
-      int* colunmSum = malloc(orderOfMatrix*sizeof(long int));
-
       #pragma omp parallel for private(i) num_threads(numberOfThreads)
       for (i = 0; i < orderOfMatrix; i++)
       {
@@ -133,6 +137,9 @@ int main(int argc, char *argv[])
       if (colunmCriteria)
          printf("Converge pelo metodo das colunas");
    }
+
+   tempoConvergencia = omp_get_wtime() - tempoConvergencia;
+   tempoIteracoes = omp_get_wtime();
    /*********************** -------------------- ***************************** */
    /*********************** Calculos dos x_i^k+1 ***************************** */
    /*********************** -------------------- ***************************** */
@@ -147,8 +154,7 @@ int main(int argc, char *argv[])
       lastResults[i] = (float)bVector[i] / (float)matrix[i][i];
    }
    /******************** Iteracoes do metodo de Jacobi *********************** */
-   printf("\n\nComecando as iteracoes\n");
-   omp_set_nested(1);
+   printf("\nComecando as iteracoes\n");
    do
    {
       maximoValor = 0;
@@ -196,9 +202,23 @@ int main(int argc, char *argv[])
       //printf(" \n ---------- Separador --------- \n");
    } while (maximoDiff / maximoValor >= 0.0015);
 
-   wtime = omp_get_wtime() - wtime;
-   printf("Tempo Paralelo: %.5f\n", wtime );
+   gettimeofday(&end, NULL);
+   tempoIteracoes = omp_get_wtime() - tempoIteracoes;
+
+   /* long seconds = (end.tv_sec - start.tv_sec);
+   long micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
+   printf("Tempo Paralelo gettimeofday(): %ld segundos e %ld microsegundos\n", seconds, micros); */
+
+   //printf("Tempo Paralelo OMP: %.5f segundos\n", wtime );
+   printf("Tempo Paralelo Convergencia: %.5f segundos\n", tempoConvergencia);
+   printf("Tempo Paralelo Iteracoes: %.5f segundos\n", tempoIteracoes);
+   printf("Tempo total: %.5f segundos\n", (tempoConvergencia+tempoIteracoes));
    printf("Total de iteracoes: %d\n", k);
+   free(lineSum);
+   free(colunmSum);
+   free(matrix);
+   free(lastResults);
+   free(currentResults);
 
    /* printf("\nResposta: \n");
    for (i = 0; i < orderOfMatrix; i++)
