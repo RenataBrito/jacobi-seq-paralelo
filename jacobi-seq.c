@@ -13,10 +13,13 @@ int main(int argc, char *argv[])
 
    srand(64591);
    testArguments(argc);
+   double tempoConvergencia;
+   double tempoIteracoes;
    int orderOfMatrix = atoi(argv[1]);
    int numberOfThreads = atoi(argv[2]);
    int i, j;
    int* lineSum = malloc(orderOfMatrix*sizeof(long int));
+   int* colunmSum = malloc(orderOfMatrix*sizeof(long int));
    int bVector[orderOfMatrix];
    printf("\nMatrix Order: %d, Number of Threads:  %d \n", orderOfMatrix, numberOfThreads);
    int** matrix = malloc(orderOfMatrix*sizeof(*matrix));
@@ -57,7 +60,7 @@ int main(int argc, char *argv[])
 
    /*********************** Criterios de Convergencia ***************************** */
    /************************** Criterio das Linhas ******************************** */
-   wtime = omp_get_wtime();
+   tempoConvergencia = omp_get_wtime();
 
    int lineCriteria = 1; 
    for (i = 0; i < orderOfMatrix; i++)
@@ -91,7 +94,6 @@ int main(int argc, char *argv[])
    {
       /*********************** Critério das Colunas ***************************** */
       int colunmCriteria = 1;
-      int* colunmSum = malloc(orderOfMatrix*sizeof(long int));
 
       for (i = 0; i < orderOfMatrix; i++)
       {
@@ -120,6 +122,8 @@ int main(int argc, char *argv[])
       if (colunmCriteria)
          printf("Converge pelo metodo das colunas!");
    }
+   tempoConvergencia = omp_get_wtime() - tempoConvergencia;
+   tempoIteracoes = omp_get_wtime();
    /*********************** -------------------- ***************************** */
    /*********************** Calculos dos x_i^k+1 ***************************** */
    /*********************** -------------------- ***************************** */
@@ -170,10 +174,18 @@ int main(int argc, char *argv[])
    } while (maximoDiff / maximoValor >= 0.0015);
 
    printf("Total de iteracoes: %d\n", k);
-   wtime = omp_get_wtime() - wtime;
+   tempoIteracoes = omp_get_wtime() - tempoIteracoes;
 
     
-    printf ("Tempo sequencial: %.5f\n", wtime );
+   printf("Tempo Sequencial Convergencia: %.5f segundos\n", tempoConvergencia);
+   printf("Tempo Sequencial Iteracoes: %.5f segundos\n", tempoIteracoes);
+   printf("Tempo total: %.5f segundos\n", (tempoConvergencia+tempoIteracoes));
+
+   free(lineSum);
+   free(colunmSum);
+   free(matrix);
+   free(lastResults);
+   free(currentResults);
 
    /*printf("\nResposta: ");
    for (i = 0; i < orderOfMatrix; i++)
