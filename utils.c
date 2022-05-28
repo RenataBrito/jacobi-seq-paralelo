@@ -1,3 +1,9 @@
+/*
+Luis Eduardo Prado Santini 9065750
+Marianna Karenina de A. Flôres 10821144
+Renata Oliveira Brito 10373663
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 

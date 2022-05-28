@@ -1,6 +1,15 @@
-all:
-	gcc -fopenmp jacobi-seq.c -o execSeq
+all: seq par
 
-run:
-	./execSeq 10000 2
+seq: jacobiseq.c
+	gcc -fopenmp jacobiseq.c -o execSeq
+
+par: jacobipar.c
+	gcc -fopenmp jacobipar.c -o execPar
+
+run-seq:
+	./execSeq 1000 1
+
+run-par:
+	./execPar 1000 2
+
 
