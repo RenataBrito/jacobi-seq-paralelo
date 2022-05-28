@@ -26,18 +26,6 @@ int main(int argc, char *argv[])
    for(i=0;i<orderOfMatrix;i++){
       matrix[i]=malloc(orderOfMatrix*sizeof(*matrix[i]));
    }
-   
-  // printf(" acaba de criar a matriz\n ");
-   // teste do prof
-   /*int matrix[3][3] = {
-       {4, 2, 1},
-       {1, 3, 1},
-       {2, 3, 6}};
-   int bVector[3] = {7, -8, 6};*/
-
-   // TODO tirar os prints
-   //printf("\n");
-   //printf("Matriz\n");
 
    for (i = 0; i < orderOfMatrix; i++)
    {
@@ -187,10 +175,5 @@ int main(int argc, char *argv[])
    free(lastResults);
    free(currentResults);
 
-   /*printf("\nResposta: ");
-   for (i = 0; i < orderOfMatrix; i++)
-   {
-      printf("%.3f ", currentResults[i]);
-   }*/
    return 0;
 }

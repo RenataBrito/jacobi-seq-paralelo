@@ -29,17 +29,6 @@ int main(int argc, char *argv[])
       matrix[i]=malloc(orderOfMatrix*sizeof(*matrix[i]));
    }
    
-  // printf(" acaba de criar a matriz\n ");
-   // teste do prof
-   /* int matrix[3][3] = {
-       {4, 2, 1},
-       {1, 3, 1},
-       {2, 3, 6}};
-   int bVector[3] = {7, -8, 6}; */
-
-   // TODO tirar os prints
-   //printf("\n");
-   //printf("Matriz\n");
    int nthreads,thread_num; //USO NO OPENMP
    # pragma omp parallel for private(i) num_threads(numberOfThreads)
       for (i = 0; i < orderOfMatrix; i++){
@@ -67,10 +56,7 @@ int main(int argc, char *argv[])
    #pragma omp parallel for private(i) num_threads(numberOfThreads) 
    for (i = 0; i < orderOfMatrix; i++)
    { 
-/*       thread_num = omp_get_thread_num();    
-      nthreads = omp_get_num_threads( );
-      printf(" \nHello-world da thread %d na região paralela, Num_threads aqui: %d, iteracao %d\n", thread_num, nthreads,i);
- */      lineSum[i] = 0;
+      lineSum[i] = 0;
    }
    #pragma omp parallel for private(i,j) num_threads(numberOfThreads) //grão do tamanho de cada linha!!!
    for (i = 0; i < orderOfMatrix; i++)
@@ -79,17 +65,13 @@ int main(int argc, char *argv[])
       {
          for (j = 0; j < orderOfMatrix; j++)
          {
-/*             thread_num = omp_get_thread_num();    
-            nthreads = omp_get_num_threads( );
-            #pragma omp critical //é mesmo necessário?
-            printf(" \nHello-world da thread %d na região paralela, Num_threads aqui: %d, i: %d, j: %d\n", thread_num, nthreads,i,j);
- */            if (i != j)
+            if (i != j)
             {
                lineSum[i] = lineSum[i] + matrix[i][j];
             }
             if (lineSum[i] > matrix[i][i])
             {
-               #pragma omp critical (lineCriteriaWrite) //é mesmo necessário?
+               #pragma omp critical (lineCriteriaWrite) 
                {
                lineCriteria = 0;
                }
@@ -124,7 +106,7 @@ int main(int argc, char *argv[])
                }
                if (colunmSum[i] > matrix[i][i])
                {
-                  #pragma omp critical (colunmCriteriaWrite) // é mesmo necessário?
+                  #pragma omp critical (colunmCriteriaWrite) 
                   {
                   colunmCriteria = 0;
                   }
@@ -182,49 +164,32 @@ int main(int argc, char *argv[])
          {
             maximoDiff = fabs(currentResults[i] - lastResults[i]);
          }
-/*          thread_num = omp_get_thread_num();    
-         nthreads = omp_get_num_threads( );
-         #pragma omp critical //é mesmo necessário?
-         {
-         printf(" \nHello-world da thread %d na região paralela, Num_threads aqui: %d, i: %d, j: %d\n", thread_num, nthreads,i,j);
-         }
- */      }
+      }
       // passa os valores pro vetor "velho" pra ser usado na proxima iteração
       #pragma omp parallel for private(i) num_threads(orderOfMatrix)
       for (i = 0; i < orderOfMatrix; i++)
       {
          lastResults[i] = currentResults[i];
       }
-      #pragma omp critical //Impacto disso no desempenho???
+      #pragma omp critical
       {
       k++;
       }
-      //printf(" \n ---------- Separador --------- \n");
    } while (maximoDiff / maximoValor >= 0.0015);
 
    gettimeofday(&end, NULL);
    tempoIteracoes = omp_get_wtime() - tempoIteracoes;
 
-   /* long seconds = (end.tv_sec - start.tv_sec);
-   long micros = ((seconds * 1000000) + end.tv_usec) - (start.tv_usec);
-   printf("Tempo Paralelo gettimeofday(): %ld segundos e %ld microsegundos\n", seconds, micros); */
-
-   //printf("Tempo Paralelo OMP: %.5f segundos\n", wtime );
    printf("Tempo Paralelo Convergencia: %.5f segundos\n", tempoConvergencia);
    printf("Tempo Paralelo Iteracoes: %.5f segundos\n", tempoIteracoes);
    printf("Tempo total: %.5f segundos\n", (tempoConvergencia+tempoIteracoes));
    printf("Total de iteracoes: %d\n", k);
+
    free(lineSum);
    free(colunmSum);
    free(matrix);
    free(lastResults);
    free(currentResults);
-
-   /* printf("\nResposta: \n");
-   for (i = 0; i < orderOfMatrix; i++)
-   {
-      printf("%.3f ", currentResults[i]);
-   }
-   printf("\n"); */
+   
    return 0;
 }
